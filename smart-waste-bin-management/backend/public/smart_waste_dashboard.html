@@ -1,0 +1,2028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Waste Bin Dashboard - MongoDB Integrated</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <style>
+    :root {
+      --primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      --warning: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+      --danger: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+      --dark: #1a1a2e;
+      --darker: #16213e;
+      --light: #eee;
+      --glass: rgba(255, 255, 255, 0.1);
+      --shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+      --border: rgba(255, 255, 255, 0.18);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--dark);
+      color: var(--light);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* Animated Background */
+    .bg-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: linear-gradient(45deg, #1a1a2e, #16213e, #0f3460);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+    }
+
+    .bg-animation::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                  radial-gradient(circle at 40% 40%, rgba(120, 198, 255, 0.3) 0%, transparent 50%);
+      animation: float 20s ease-in-out infinite;
+    }
+
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      33% { transform: translateY(-30px) rotate(120deg); }
+      66% { transform: translateY(-60px) rotate(240deg); }
+    }
+
+    /* Glass morphism effect */
+    .glass {
+      background: var(--glass);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    /* Layout */
+    .dashboard-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 280px;
+      padding: 2rem;
+      position: relative;
+      z-index: 100;
+    }
+
+    .sidebar.glass {
+      border-radius: 0 20px 20px 0;
+      margin: 10px 0 10px 10px;
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 2rem;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      background: var(--primary);
+      border-radius: 20px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: slideInDown 0.8s ease;
+    }
+
+    .header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .header-info {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .datetime {
+      text-align: right;
+    }
+
+    .date {
+      font-size: 1rem;
+      opacity: 0.9;
+    }
+
+    .time {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-top: 0.2rem;
+    }
+
+    .connection-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+    }
+
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    .status-connected { background: #00f2fe; }
+    .status-disconnected { background: #ff6b6b; }
+    .status-connecting { background: #feca57; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.1); }
+    }
+
+    /* Sidebar */
+    .logo {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .logo h2 {
+      background: var(--success);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .logo p {
+      opacity: 0.7;
+      font-size: 0.9rem;
+    }
+
+    .user-info {
+      background: var(--glass);
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border: 1px solid var(--border);
+    }
+
+    .user-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0 auto 1rem;
+      animation: glow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from { box-shadow: 0 0 20px rgba(240, 147, 251, 0.5); }
+      to { box-shadow: 0 0 30px rgba(245, 87, 108, 0.8); }
+    }
+
+    .user-details h3 {
+      text-align: center;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .user-details p {
+      text-align: center;
+      opacity: 0.8;
+      font-size: 0.9rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .quick-stats {
+      margin-bottom: 2rem;
+    }
+
+    .quick-stats h4 {
+      margin-bottom: 1rem;
+      font-weight: 600;
+      opacity: 0.9;
+    }
+
+    .stat-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .stat-item:last-child {
+      border-bottom: none;
+    }
+
+    .stat-value {
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 0.8rem 1.5rem;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn:hover::before {
+      left: 100%;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-warning {
+      background: var(--warning);
+      color: var(--dark);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+
+    .logout-btn {
+      width: 100%;
+      margin-top: 2rem;
+    }
+
+    .refresh-btn {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--primary);
+      border: none;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      z-index: 1000;
+      animation: float 3s ease-in-out infinite;
+      transition: all 0.3s ease;
+    }
+
+    .refresh-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 30px rgba(102, 126, 234, 0.6);
+    }
+
+    .refresh-btn.spinning {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Cards */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background: var(--glass);
+      border-radius: 20px;
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+      backdrop-filter: blur(15px);
+      animation: slideInUp 0.6s ease forwards;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(31, 38, 135, 0.5);
+    }
+
+    .card:nth-child(1) { animation-delay: 0.1s; }
+    .card:nth-child(2) { animation-delay: 0.2s; }
+    .card:nth-child(3) { animation-delay: 0.3s; }
+    .card:nth-child(4) { animation-delay: 0.4s; }
+
+    @keyframes slideInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Loading State */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(26, 26, 46, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .loading-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .loading-content {
+      background: var(--glass);
+      padding: 2rem;
+      border-radius: 20px;
+      text-align: center;
+      backdrop-filter: blur(15px);
+      border: 1px solid var(--border);
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255,255,255,0.3);
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    /* Error State */
+    .error-message {
+      background: var(--danger);
+      color: white;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    /* Form */
+    .add-bin-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+      align-items: end;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      opacity: 0.9;
+    }
+
+    .form-input {
+      padding: 0.8rem;
+      border: 1px solid var(--border);
+      background: var(--glass);
+      border-radius: 10px;
+      color: var(--light);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .form-input::placeholder {
+      color: rgba(255,255,255,0.5);
+    }
+
+    /* Bin Cards */
+    .bins-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .bin-card {
+      position: relative;
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .bin-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: var(--success);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    .bin-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .bin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .bin-id {
+      font-size: 1.3rem;
+      font-weight: 700;
+      background: var(--primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .sensor-status {
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .status-active { background: var(--success); color: var(--dark); }
+    .status-warning { background: var(--warning); color: var(--dark); }
+    .status-error { background: var(--danger); color: white; }
+
+    .fill-display {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .fill-percentage {
+      font-size: 3rem;
+      font-weight: 700;
+      line-height: 1;
+      background: var(--success);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .fill-percentage.warning {
+      background: var(--warning);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .fill-percentage.danger {
+      background: var(--danger);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .progress-container {
+      position: relative;
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+
+    .progress-bar {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 1s ease, background 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .bin-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .detail-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .detail-icon {
+      width: 20px;
+      text-align: center;
+    }
+
+    .bin-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 0.6rem;
+      font-size: 0.8rem;
+      border-radius: 8px;
+    }
+
+    /* Charts */
+    .chart-container {
+      position: relative;
+      height: 300px;
+      margin-top: 1rem;
+    }
+
+    /* AI Insights */
+    .ai-section {
+      margin-top: 2rem;
+    }
+
+    .ai-card {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+      border: 1px solid rgba(102, 126, 234, 0.3);
+    }
+
+    .ai-insights {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+
+    .insight-item {
+      background: var(--glass);
+      border-radius: 10px;
+      padding: 1rem;
+      border-left: 4px solid #667eea;
+    }
+
+    .insight-title {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #667eea;
+    }
+
+    .insight-text {
+      font-size: 0.9rem;
+      opacity: 0.9;
+      line-height: 1.4;
+    }
+
+    /* Alerts History */
+    .alerts-history {
+      margin-top: 2rem;
+    }
+
+    .alert-item {
+      background: var(--glass);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 0.5rem;
+      border-left: 4px solid #fa709a;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .alert-content {
+      flex: 1;
+    }
+
+    .alert-title {
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+      color: #fa709a;
+    }
+
+    .alert-message {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .alert-time {
+      font-size: 0.8rem;
+      opacity: 0.6;
+      white-space: nowrap;
+      margin-left: 1rem;
+    }
+
+    /* Notifications */
+    .notification {
+      position: fixed;
+      top: 2rem;
+      right: 2rem;
+      padding: 1rem 1.5rem;
+      border-radius: 10px;
+      color: white;
+      font-weight: 600;
+      z-index: 2000;
+      transform: translateX(400px);
+      transition: transform 0.3s ease;
+      min-width: 300px;
+    }
+
+    .notification.show {
+      transform: translateX(0);
+    }
+
+    .notification.success { background: var(--success); }
+    .notification.warning { background: var(--warning); color: var(--dark); }
+    .notification.error { background: var(--danger); }
+    .notification.info { background: var(--primary); }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .dashboard-container {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        border-radius: 0;
+        margin: 0;
+      }
+      
+      .add-bin-form {
+        grid-template-columns: 1fr;
+      }
+      
+      .header-info {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-animation"></div>
+  
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <p>Connecting to MongoDB...</p>
+    </div>
+  </div>
+  
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <div class="sidebar glass">
+      <div class="logo">
+        <h2>🗑️ SmartWaste</h2>
+        <p>MongoDB Integrated</p>
+      </div>
+
+      <div class="user-info">
+        <div class="user-avatar" id="userAvatar">--</div>
+        <div class="user-details">
+          <h3 id="userName">Loading...</h3>
+          <p id="userRole">Loading...</p>
+          <p id="lastLogin">Last login: Loading...</p>
+        </div>
+      </div>
+
+      <div class="quick-stats">
+        <h4>Quick Stats</h4>
+        <div class="stat-item">
+          <span>Total Bins</span>
+          <span class="stat-value" id="totalBins">--</span>
+        </div>
+        <div class="stat-item">
+          <span>Full Bins</span>
+          <span class="stat-value" id="fullBins">--</span>
+        </div>
+        <div class="stat-item">
+          <span>Average Fill</span>
+          <span class="stat-value" id="avgFill">--%</span>
+        </div>
+        <div class="stat-item">
+          <span>Collections Due</span>
+          <span class="stat-value" id="collectionDue">--</span>
+        </div>
+      </div>
+
+      <button class="btn btn-danger logout-btn" onclick="logout()">
+        🚪 Logout
+      </button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Header -->
+      <div class="header">
+        <h1>Dashboard Overview</h1>
+        <div class="header-info">
+          <div class="datetime">
+            <div class="date" id="currentDate">Loading...</div>
+            <div class="time" id="currentTime">Loading...</div>
+          </div>
+          <div class="connection-status" id="connectionStatus">
+            <div class="status-dot status-connecting"></div>
+            <span>Connecting to MongoDB...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+      <!-- Add Bin Card -->
+      <div class="card">
+        <h3>🆕 Add New Bin</h3>
+        <form class="add-bin-form" id="addBinForm">
+          <div class="form-group">
+            <label for="binLocation">Location</label>
+            <input type="text" id="binLocation" class="form-input" placeholder="e.g., Main Building - Lobby" required />
+          </div>
+          <div class="form-group">
+            <label for="binCapacity">Capacity (L)</label>
+            <input type="number" id="binCapacity" class="form-input" placeholder="100" min="1" required />
+          </div>
+          <div class="form-group">
+            <button type="submit" class="btn btn-success">
+              ➕ Add Bin
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Bin Overview -->
+      <div class="card">
+        <h3>📊 Fill Level Overview</h3>
+        <div class="chart-container">
+          <canvas id="binChart"></canvas>
+        </div>
+      </div>
+
+      <!-- AI Insights -->
+      <div class="ai-section">
+        <div class="card ai-card">
+          <h3>🤖 AI Insights & Predictions</h3>
+          <div class="ai-insights" id="aiInsights">
+            <div class="insight-item">
+              <div class="insight-title">Loading AI Analysis...</div>
+              <div class="insight-text">Please wait while we analyze your waste management data.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alerts History -->
+      <div class="alerts-history">
+        <div class="card">
+          <h3>🚨 Alerts History</h3>
+          <div id="alertsContainer">
+            <div class="insight-item">
+              <div class="insight-title">Loading alerts...</div>
+              <div class="insight-text">Fetching recent system alerts and notifications.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bins Grid -->
+      <div class="bins-grid" id="binsGrid">
+        <!-- Bin cards will be populated here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Refresh Button -->
+  <button class="refresh-btn" id="refreshBtn" onclick="refreshData()" title="Refresh Data">
+    🔄
+  </button>
+
+  <script>
+    // Configuration
+    const CONFIG = {
+      API_BASE_URL: 'https://6aa4f3e9c19f.ngrok-free.app/api', // Update this to match your backend
+      WS_URL: 'wss://6aa4f3e9c19f.ngrok-free.app', // Update this to match your WebSocket server
+      REFRESH_INTERVAL: 30000, // 30 seconds
+      RETRY_DELAY: 5000, // 5 seconds
+      MAX_RETRIES: 3
+    };
+
+    // Dashboard Controller Class
+    class SmartWasteDashboard {
+      constructor() {
+        this.wsConnection = null;
+        this.binData = [];
+        this.chart = null;
+        this.aiAnalytics = null;
+        this.refreshInterval = null;
+        this.retryCount = 0;
+        this.alerts = [];
+        
+        // User session (this would normally come from authentication)
+        this.userSession = {
+          username: 'System Administrator',
+          role: 'Administrator',
+          lastLogin: new Date().toISOString(),
+          token: null // Will be set after authentication
+        };
+        
+        this.init();
+      }
+      
+      async init() {
+        console.log('🚀 Initializing Smart Waste Dashboard...');
+        
+        this.showLoadingOverlay(true);
+        this.updateDateTime();
+        this.updateUserInterface();
+        this.setupEventListeners();
+        
+        try {
+          // Test connection and load data
+          await this.testConnection();
+          await this.loadBinData();
+          await this.loadAlertsHistory();
+          
+          // Initialize AI Analytics
+          this.initializeAI();
+          
+          // Start real-time updates
+          this.startRealTimeUpdates();
+          this.initializeWebSocket();
+          
+          this.updateConnectionStatus('connected');
+          console.log('✅ Dashboard initialized successfully');
+          
+        } catch (error) {
+          console.error('❌ Dashboard initialization failed:', error);
+          this.handleConnectionError(error);
+        } finally {
+          this.showLoadingOverlay(false);
+        }
+      }
+
+      showLoadingOverlay(show) {
+        const overlay = document.getElementById('loadingOverlay');
+        if (show) {
+          overlay.classList.add('show');
+        } else {
+          overlay.classList.remove('show');
+        }
+      }
+
+      async testConnection() {
+        try {
+          const response = await fetch(`${CONFIG.API_BASE_URL}/health`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            timeout: 10000
+          });
+
+          if (!response.ok) {
+            throw new Error(`Server responded with status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log('✅ Backend connection successful:', data);
+          return true;
+        } catch (error) {
+          console.error('❌ Backend connection failed:', error);
+          throw error;
+        }
+      }
+
+      handleConnectionError(error) {
+        this.updateConnectionStatus('disconnected');
+        this.showErrorMessage(`Connection failed: ${error.message}. Please check your backend server.`);
+        
+        // Try to load demo data as fallback
+        this.loadDemoData();
+        this.renderDashboard();
+      }
+
+      showErrorMessage(message) {
+        const errorElement = document.getElementById('errorMessage');
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+        
+        // Hide after 10 seconds
+        setTimeout(() => {
+          errorElement.style.display = 'none';
+        }, 10000);
+      }
+      
+      async loadBinData() {
+        try {
+          console.log('📡 Fetching bin data from MongoDB...');
+          
+          const response = await fetch(`${CONFIG.API_BASE_URL}/bins`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': this.userSession.token ? `Bearer ${this.userSession.token}` : ''
+            }
+          });
+          
+          if (!response.ok) {
+            if (response.status === 404) {
+              console.log('ℹ️ No bins endpoint found, trying alternative endpoints...');
+              return await this.tryAlternativeEndpoints();
+            }
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+          
+          const data = await response.json();
+          console.log('✅ Raw response from server:', data);
+          
+          // Handle different response formats
+          if (data.success && data.data) {
+            this.binData = Array.isArray(data.data) ? data.data : [data.data];
+          } else if (Array.isArray(data)) {
+            this.binData = data;
+          } else if (data.bins) {
+            this.binData = data.bins;
+          } else {
+            this.binData = [];
+          }
+          
+          // Transform MongoDB data to match our interface
+          this.binData = this.binData.map(bin => this.transformBinData(bin));
+          
+          console.log(`✅ Loaded ${this.binData.length} bins from MongoDB:`, this.binData);
+          this.retryCount = 0;
+          
+        } catch (error) {
+          console.error('❌ Failed to load bin data:', error);
+          this.retryCount++;
+          
+          if (this.retryCount < CONFIG.MAX_RETRIES) {
+            console.log(`🔄 Retrying in ${CONFIG.RETRY_DELAY/1000}s... (Attempt ${this.retryCount}/${CONFIG.MAX_RETRIES})`);
+            setTimeout(() => this.loadBinData(), CONFIG.RETRY_DELAY);
+            return;
+          }
+          
+          throw error;
+        }
+        
+        this.renderDashboard();
+      }
+
+      async tryAlternativeEndpoints() {
+        const endpoints = ['/bin', '/wastebin', '/smartbins'];
+        
+        for (const endpoint of endpoints) {
+          try {
+            console.log(`🔍 Trying endpoint: ${CONFIG.API_BASE_URL}${endpoint}`);
+            const response = await fetch(`${CONFIG.API_BASE_URL}${endpoint}`, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': this.userSession.token ? `Bearer ${this.userSession.token}` : ''
+              }
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              console.log(`✅ Found working endpoint: ${endpoint}`, data);
+              
+              if (data.success && data.data) {
+                this.binData = Array.isArray(data.data) ? data.data : [data.data];
+              } else if (Array.isArray(data)) {
+                this.binData = data;
+              } else {
+                this.binData = [];
+              }
+              
+              this.binData = this.binData.map(bin => this.transformBinData(bin));
+              return;
+            }
+          } catch (error) {
+            console.log(`❌ Endpoint ${endpoint} failed:`, error.message);
+          }
+        }
+        
+        throw new Error('No working API endpoints found');
+      }
+
+      transformBinData(bin) {
+        // Transform MongoDB document to match our interface
+        return {
+          binId: bin._id || bin.binId || bin.id,
+          location: bin.location || 'Unknown Location',
+          fillLevel: bin.fillLevel || bin.fill_level || 0,
+          capacity: bin.capacity || 100,
+          batteryLevel: bin.batteryLevel || bin.battery_level || 100,
+          temperature: bin.temperature || 22,
+          sensorStatus: bin.sensorStatus || bin.sensor_status || 'active',
+          lastEmptied: bin.lastEmptied ? new Date(bin.lastEmptied) : new Date(),
+          timestamp: bin.timestamp ? new Date(bin.timestamp) : new Date(),
+          // Add any additional MongoDB-specific fields
+          createdAt: bin.createdAt ? new Date(bin.createdAt) : new Date(),
+          updatedAt: bin.updatedAt ? new Date(bin.updatedAt) : new Date()
+        };
+      }
+      
+      async loadAlertsHistory() {
+        try {
+          const response = await fetch(`${CONFIG.API_BASE_URL}/alerts`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': this.userSession.token ? `Bearer ${this.userSession.token}` : ''
+            }
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            this.alerts = data.data || data.alerts || [];
+            console.log(`✅ Loaded ${this.alerts.length} alerts`);
+          } else {
+            // Generate demo alerts if no backend alerts
+            this.generateDemoAlerts();
+          }
+        } catch (error) {
+          console.log('⚠️ Could not load alerts, generating demo alerts');
+          this.generateDemoAlerts();
+        }
+        
+        this.renderAlertsHistory();
+      }
+
+      generateDemoAlerts() {
+        const now = new Date();
+        this.alerts = [
+          {
+            id: 1,
+            type: 'FULL_BIN',
+            title: 'Bin Full Alert',
+            message: 'Bin at Main Building - Lobby is 95% full and needs immediate collection',
+            timestamp: new Date(now.getTime() - (2 * 60 * 60 * 1000)), // 2 hours ago
+            severity: 'high',
+            binId: 1
+          },
+          {
+            id: 2,
+            type: 'DISCONNECTED',
+            title: 'Sensor Disconnected',
+            message: 'Bin at Parking Garage - Level B1 has lost connection',
+            timestamp: new Date(now.getTime() - (6 * 60 * 60 * 1000)), // 6 hours ago
+            severity: 'medium',
+            binId: 4
+          },
+          {
+            id: 3,
+            type: 'LOW_BATTERY',
+            title: 'Low Battery Warning',
+            message: 'Bin at Conference Center has battery level below 30%',
+            timestamp: new Date(now.getTime() - (12 * 60 * 60 * 1000)), // 12 hours ago
+            severity: 'low',
+            binId: 5
+          }
+        ];
+      }
+
+      renderAlertsHistory() {
+        const container = document.getElementById('alertsContainer');
+        
+        if (this.alerts.length === 0) {
+          container.innerHTML = `
+            <div class="insight-item">
+              <div class="insight-title">No Alerts</div>
+              <div class="insight-text">System is running smoothly with no active alerts.</div>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = this.alerts.map(alert => `
+          <div class="alert-item">
+            <div class="alert-content">
+              <div class="alert-title">${alert.title}</div>
+              <div class="alert-message">${alert.message}</div>
+            </div>
+            <div class="alert-time">${this.formatRelativeTime(alert.timestamp)}</div>
+          </div>
+        `).join('');
+      }
+
+      formatRelativeTime(timestamp) {
+        const now = new Date();
+        const diff = now - new Date(timestamp);
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        
+        if (hours > 0) {
+          return `${hours}h ago`;
+        } else if (minutes > 0) {
+          return `${minutes}m ago`;
+        } else {
+          return 'Just now';
+        }
+      }
+      
+      loadDemoData() {
+        console.log('📝 Loading demo data as fallback...');
+        const now = new Date();
+        this.binData = [
+          {
+            binId: 'demo-1',
+            location: 'Main Building - Lobby',
+            fillLevel: 45,
+            capacity: 100,
+            batteryLevel: 89,
+            temperature: 22,
+            sensorStatus: 'active',
+            lastEmptied: new Date(now.getTime() - (2 * 24 * 60 * 60 * 1000)),
+            timestamp: now
+          },
+          {
+            binId: 'demo-2',
+            location: 'Cafeteria - East Wing',
+            fillLevel: 78,
+            capacity: 120,
+            batteryLevel: 95,
+            temperature: 24,
+            sensorStatus: 'active',
+            lastEmptied: new Date(now.getTime() - (1 * 24 * 60 * 60 * 1000)),
+            timestamp: now
+          }
+        ];
+      }
+      
+      async addNewBin() {
+        const location = document.getElementById('binLocation').value.trim();
+        const capacity = parseInt(document.getElementById('binCapacity').value);
+        
+        if (!location || !capacity || capacity <= 0) {
+          this.showNotification('Please enter valid bin details', 'error');
+          return;
+        }
+        
+        const submitButton = document.querySelector('#addBinForm button[type="submit"]');
+        const originalText = submitButton.textContent;
+        submitButton.textContent = 'Adding...';
+        submitButton.disabled = true;
+        
+        try {
+          const newBinData = {
+            location: location,
+            capacity: capacity,
+            fillLevel: 0,
+            batteryLevel: 100,
+            temperature: 22,
+            sensorStatus: 'active'
+          };
+          
+          console.log('📡 Sending new bin data to MongoDB:', newBinData);
+          
+          const response = await fetch(`${CONFIG.API_BASE_URL}/bins`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': this.userSession.token ? `Bearer ${this.userSession.token}` : ''
+            },
+            body: JSON.stringify(newBinData)
+          });
+          
+          if (!response.ok) {
+            // Try alternative endpoints
+            const altResponse = await fetch(`${CONFIG.API_BASE_URL}/bin`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': this.userSession.token ? `Bearer ${this.userSession.token}` : ''
+              },
+              body: JSON.stringify(newBinData)
+            });
+            
+            if (!altResponse.ok) {
+              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const result = await altResponse.json();
+            console.log('✅ Bin added successfully via alternative endpoint:', result);
+          } else {
+            const result = await response.json();
+            console.log('✅ Bin added successfully:', result);
+          }
+          
+          this.showNotification('✅ Bin added successfully to MongoDB!', 'success');
+          document.getElementById('addBinForm').reset();
+          
+          // Reload data to show the new bin
+          await this.loadBinData();
+          
+        } catch (error) {
+          console.error('❌ Error adding bin:', error);
+          this.showNotification(`Failed to add bin: ${error.message}`, 'error');
+          
+          // Add to local data as fallback for demo purposes
+          const newBin = {
+            binId: `demo-${Date.now()}`,
+            location: location,
+            capacity: capacity,
+            fillLevel: 0,
+            batteryLevel: 100,
+            temperature: 22,
+            sensorStatus: 'active',
+            lastEmptied: new Date(),
+            timestamp: new Date()
+          };
+          
+          this.binData.push(newBin);
+          this.renderDashboard();
+          this.showNotification('✅ Bin added locally (Demo Mode)', 'warning');
+          document.getElementById('addBinForm').reset();
+          
+        } finally {
+          submitButton.textContent = originalText;
+          submitButton.disabled = false;
+        }
+      }
+      
+      initializeAI() {
+        this.aiAnalytics = {
+          initialized: true,
+          getInsights: (bins) => this.generateAIInsights(bins),
+          generatePredictions: (bins) => this.generatePredictions(bins)
+        };
+        console.log('🤖 AI Analytics initialized');
+      }
+      
+      updateDateTime() {
+        const updateTime = () => {
+          const now = new Date();
+          const dateOptions = { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          };
+          const timeOptions = { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit' 
+          };
+          
+          document.getElementById('currentDate').textContent = 
+            now.toLocaleDateString('en-US', dateOptions);
+          document.getElementById('currentTime').textContent = 
+            now.toLocaleTimeString('en-US', timeOptions);
+        };
+        
+        updateTime();
+        setInterval(updateTime, 1000);
+      }
+      
+      updateUserInterface() {
+        document.getElementById('userName').textContent = this.userSession.username;
+        document.getElementById('userRole').textContent = this.userSession.role;
+        document.getElementById('lastLogin').textContent = 
+          `Last login: ${new Date(this.userSession.lastLogin).toLocaleString()}`;
+        
+        const initials = this.userSession.username
+          .split(' ')
+          .map(name => name[0])
+          .join('')
+          .toUpperCase();
+        document.getElementById('userAvatar').textContent = initials;
+      }
+      
+      setupEventListeners() {
+        document.getElementById('addBinForm').addEventListener('submit', (e) => {
+          e.preventDefault();
+          this.addNewBin();
+        });
+        
+        window.addEventListener('beforeunload', () => this.cleanup());
+        
+        // Handle online/offline events
+        window.addEventListener('online', () => {
+          console.log('🌐 Connection restored');
+          this.loadBinData();
+        });
+        
+        window.addEventListener('offline', () => {
+          console.log('📵 Connection lost');
+          this.updateConnectionStatus('disconnected');
+        });
+      }
+      
+      renderDashboard() {
+        this.updateQuickStats();
+        this.renderBinCards();
+        this.renderChart();
+        this.generateAndDisplayAIInsights();
+      }
+      
+      updateQuickStats() {
+        const totalBins = this.binData.length;
+        const fullBins = this.binData.filter(bin => bin.fillLevel >= 85).length;
+        const avgFill = totalBins > 0 ? 
+          Math.round(this.binData.reduce((sum, bin) => sum + bin.fillLevel, 0) / totalBins) : 0;
+        const collectionDue = this.binData.filter(bin => bin.fillLevel >= 70).length;
+        
+        document.getElementById('totalBins').textContent = totalBins;
+        document.getElementById('fullBins').textContent = fullBins;
+        document.getElementById('avgFill').textContent = avgFill + '%';
+        document.getElementById('collectionDue').textContent = collectionDue;
+      }
+      
+      renderBinCards() {
+        const grid = document.getElementById('binsGrid');
+        grid.innerHTML = '';
+        
+        if (this.binData.length === 0) {
+          grid.innerHTML = `
+            <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+              <h3>📭 No Bins Found</h3>
+              <p style="opacity: 0.7; margin-top: 1rem;">
+                ${this.updateConnectionStatus === 'connected' ? 
+                  'No bins are currently registered in your MongoDB database. Add your first bin above!' : 
+                  'Could not connect to MongoDB. Please check your backend server.'}
+              </p>
+            </div>
+          `;
+          return;
+        }
+        
+        this.binData.forEach((bin, index) => {
+          const card = this.createBinCard(bin, index);
+          grid.appendChild(card);
+        });
+      }
+      
+      createBinCard(bin, index) {
+        const fillClass = this.getFillLevelClass(bin.fillLevel);
+        const statusClass = this.getSensorStatusClass(bin.sensorStatus);
+        
+        const card = document.createElement('div');
+        card.className = 'card bin-card';
+        card.style.animationDelay = `${index * 0.1}s`;
+        
+        card.innerHTML = `
+          <div class="bin-header">
+            <div class="bin-id">Bin ${bin.binId}</div>
+            <div class="sensor-status ${statusClass}">${this.getSensorStatusText(bin.sensorStatus)}</div>
+          </div>
+          
+          <div class="fill-display">
+            <div class="fill-percentage ${fillClass}">${bin.fillLevel}%</div>
+          </div>
+          
+          <div class="progress-container">
+            <div class="progress-bar" style="width: ${bin.fillLevel}%; background: ${this.getFillLevelColor(bin.fillLevel)};"></div>
+          </div>
+          
+          <div class="bin-details">
+            <div class="detail-item">
+              <span class="detail-icon">📍</span>
+              <span>${bin.location}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-icon">🗑️</span>
+              <span>${bin.capacity}L capacity</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-icon">🔋</span>
+              <span>${bin.batteryLevel}% battery</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-icon">🌡️</span>
+              <span>${bin.temperature}°C</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-icon">🕒</span>
+              <span>Updated: ${this.formatRelativeTime(bin.timestamp)}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-icon">🗑️</span>
+              <span>Last emptied: ${this.formatRelativeTime(bin.lastEmptied)}</span>
+            </div>
+          </div>
+          
+          <div class="bin-actions">
+            <button class="btn btn-primary action-btn" onclick="dashboard.scheduleMaintenance('${bin.binId}')">
+              🔧 Maintain
+            </button>
+            <button class="btn btn-warning action-btn" onclick="dashboard.scheduleCollection('${bin.binId}')">
+              🗑️ Collect
+            </button>
+            <button class="btn btn-danger action-btn" onclick="dashboard.deleteBin('${bin.binId}')">
+              🗑️ Delete
+            </button>
+          </div>
+        `;
+        
+        return card;
+      }
+
+      async deleteBin(binId) {
+        if (!confirm(`Are you sure you want to delete bin ${binId}?`)) return;
+        
+        try {
+          const response = await fetch(`${CONFIG.API_BASE_URL}/bins/${binId}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': this.userSession.token ? `Bearer ${this.userSession.token}` : ''
+            }
+          });
+          
+          if (response.ok) {
+            this.showNotification(`✅ Bin ${binId} deleted successfully!`, 'success');
+            await this.loadBinData();
+          } else {
+            throw new Error('Failed to delete bin');
+          }
+        } catch (error) {
+          console.error('Error deleting bin:', error);
+          
+          // Remove from local data as fallback
+          this.binData = this.binData.filter(bin => bin.binId !== binId);
+          this.renderDashboard();
+          this.showNotification(`✅ Bin ${binId} removed locally!`, 'warning');
+        }
+      }
+      
+      getFillLevelClass(fillLevel) {
+        if (fillLevel >= 85) return 'danger';
+        if (fillLevel >= 60) return 'warning';
+        return '';
+      }
+      
+      getFillLevelColor(fillLevel) {
+        if (fillLevel >= 85) return 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)';
+        if (fillLevel >= 60) return 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)';
+        return 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
+      }
+      
+      getSensorStatusClass(status) {
+        switch (status) {
+          case 'active': return 'status-active';
+          case 'warning': return 'status-warning';
+          case 'error': return 'status-error';
+          default: return 'status-active';
+        }
+      }
+      
+      getSensorStatusText(status) {
+        switch (status) {
+          case 'active': return '🟢 Active';
+          case 'warning': return '🟡 Warning';
+          case 'error': return '🔴 Error';
+          default: return '🟢 Active';
+        }
+      }
+      
+      renderChart() {
+        const ctx = document.getElementById('binChart');
+        if (!ctx) return;
+        
+        if (this.chart) {
+          this.chart.destroy();
+        }
+        
+        if (this.binData.length === 0) {
+          ctx.getContext('2d').clearRect(0, 0, ctx.width, ctx.height);
+          return;
+        }
+        
+        const labels = this.binData.map(bin => `Bin ${bin.binId.toString().substring(0, 8)}`);
+        const data = this.binData.map(bin => bin.fillLevel);
+        const colors = this.binData.map(bin => this.getFillLevelColor(bin.fillLevel));
+        
+        this.chart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Fill Level (%)',
+              data: data,
+              backgroundColor: colors,
+              borderRadius: 8,
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.8)',
+                titleColor: 'white',
+                bodyColor: 'white',
+                borderColor: 'rgba(255,255,255,0.2)',
+                borderWidth: 1,
+                callbacks: {
+                  afterLabel: (context) => {
+                    const bin = this.binData[context.dataIndex];
+                    return [
+                      `Location: ${bin.location}`,
+                      `Battery: ${bin.batteryLevel}%`,
+                      `Temperature: ${bin.temperature}°C`,
+                      `Last Updated: ${new Date(bin.timestamp).toLocaleString()}`
+                    ];
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 100,
+                grid: { color: 'rgba(255,255,255,0.1)' },
+                ticks: { 
+                  color: 'rgba(255,255,255,0.7)',
+                  callback: function(value) {
+                    return value + '%';
+                  }
+                }
+              },
+              x: {
+                grid: { display: false },
+                ticks: { color: 'rgba(255,255,255,0.7)' }
+              }
+            },
+            animation: {
+              duration: 1000,
+              easing: 'easeOutQuart'
+            }
+          }
+        });
+      }
+      
+      generateAndDisplayAIInsights() {
+        if (!this.aiAnalytics || !this.aiAnalytics.initialized) {
+          return;
+        }
+        
+        const insights = this.aiAnalytics.getInsights(this.binData);
+        const container = document.getElementById('aiInsights');
+        
+        container.innerHTML = insights.map(insight => `
+          <div class="insight-item">
+            <div class="insight-title">${insight.title}</div>
+            <div class="insight-text">${insight.message}</div>
+          </div>
+        `).join('');
+      }
+      
+      generateAIInsights(bins) {
+        if (!bins || bins.length === 0) {
+          return [{
+            title: 'No Data Available',
+            message: 'Connect to MongoDB and add some bins to see AI insights and predictions.'
+          }];
+        }
+        
+        const insights = [];
+        
+        // Urgent collections needed
+        const urgentBins = bins.filter(bin => bin.fillLevel >= 85);
+        if (urgentBins.length > 0) {
+          insights.push({
+            title: '🚨 Urgent Collections Needed',
+            message: `${urgentBins.length} bin(s) need immediate attention. Critical bins: ${urgentBins.map(b => b.binId.toString().substring(0, 8)).join(', ')}`
+          });
+        }
+        
+        // System utilization analysis
+        const avgFill = bins.reduce((sum, bin) => sum + bin.fillLevel, 0) / bins.length;
+        if (avgFill > 70) {
+          insights.push({
+            title: '📈 High System Utilization',
+            message: `Average fill level is ${avgFill.toFixed(1)}%. Consider optimizing collection schedules or adding more bins.`
+          });
+        } else if (avgFill < 30) {
+          insights.push({
+            title: '📉 Low System Utilization',
+            message: `Average fill level is ${avgFill.toFixed(1)}%. System capacity is underutilized - excellent efficiency!`
+          });
+        }
+        
+        // Battery maintenance analysis
+        const lowBatteryBins = bins.filter(bin => bin.batteryLevel < 30);
+        if (lowBatteryBins.length > 0) {
+          insights.push({
+            title: '🔋 Battery Maintenance Required',
+            message: `${lowBatteryBins.length} bin(s) have low battery levels: ${lowBatteryBins.map(b => b.binId.toString().substring(0, 8)).join(', ')}`
+          });
+        }
+        
+        // Disconnected sensors
+        const disconnectedBins = bins.filter(bin => bin.sensorStatus === 'error');
+        if (disconnectedBins.length > 0) {
+          insights.push({
+            title: '📡 Sensor Connectivity Issues',
+            message: `${disconnectedBins.length} bin(s) have sensor issues and need technical attention.`
+          });
+        }
+        
+        // Performance insight
+        const optimalBins = bins.filter(bin => bin.fillLevel >= 40 && bin.fillLevel < 80 && bin.batteryLevel > 50);
+        if (optimalBins.length === bins.length) {
+          insights.push({
+            title: '✅ Optimal Performance',
+            message: 'All bins are operating within optimal parameters. MongoDB integration is working perfectly!'
+          });
+        }
+        
+        // Add connection status insight
+        insights.push({
+          title: '🔌 Database Connection',
+          message: `Successfully connected to MongoDB. Real-time data sync active for ${bins.length} bins.`
+        });
+        
+        return insights.length > 0 ? insights : [{
+          title: '🤖 AI Analysis Complete',
+          message: 'System is running smoothly with MongoDB integration. No immediate actions required.'
+        }];
+      }
+      
+      scheduleMaintenance(binId) {
+        this.showNotification(`🔧 Maintenance scheduled for Bin ${binId}`, 'info');
+        console.log(`Maintenance scheduled for Bin ${binId}`);
+        
+        // Add to alerts
+        this.alerts.unshift({
+          id: Date.now(),
+          type: 'MAINTENANCE',
+          title: 'Maintenance Scheduled',
+          message: `Maintenance has been scheduled for Bin ${binId}`,
+          timestamp: new Date(),
+          severity: 'low',
+          binId: binId
+        });
+        
+        this.renderAlertsHistory();
+      }
+      
+      scheduleCollection(binId) {
+        this.showNotification(`🗑️ Collection scheduled for Bin ${binId}`, 'success');
+        console.log(`Collection scheduled for Bin ${binId}`);
+        
+        // Add to alerts
+        this.alerts.unshift({
+          id: Date.now(),
+          type: 'COLLECTION',
+          title: 'Collection Scheduled',
+          message: `Waste collection has been scheduled for Bin ${binId}`,
+          timestamp: new Date(),
+          severity: 'low',
+          binId: binId
+        });
+        
+        this.renderAlertsHistory();
+      }
+      
+      updateConnectionStatus(status) {
+        const statusElement = document.getElementById('connectionStatus');
+        const dot = statusElement.querySelector('.status-dot');
+        const text = statusElement.querySelector('span');
+        
+        dot.className = 'status-dot';
+        
+        switch (status) {
+          case 'connected':
+            dot.classList.add('status-connected');
+            text.textContent = 'Connected to MongoDB';
+            break;
+          case 'disconnected':
+            dot.classList.add('status-disconnected');
+            text.textContent = 'MongoDB Disconnected';
+            break;
+          case 'connecting':
+            dot.classList.add('status-connecting');
+            text.textContent = 'Connecting to MongoDB...';
+            break;
+        }
+      }
+      
+      startRealTimeUpdates() {
+        // Refresh data from MongoDB every 30 seconds
+        this.refreshInterval = setInterval(async () => {
+          try {
+            console.log('🔄 Auto-refreshing data from MongoDB...');
+            await this.loadBinData();
+          } catch (error) {
+            console.error('Auto-refresh failed:', error);
+          }
+        }, CONFIG.REFRESH_INTERVAL);
+      }
+      
+      initializeWebSocket() {
+        try {
+          console.log('📡 Attempting WebSocket connection...');
+          this.wsConnection = new WebSocket(CONFIG.WS_URL);
+          
+          this.wsConnection.onopen = () => {
+            console.log('📡 WebSocket connected to backend');
+            this.updateConnectionStatus('connected');
+          };
+          
+          this.wsConnection.onmessage = (event) => {
+            try {
+              const data = JSON.parse(event.data);
+              console.log('📡 WebSocket message received:', data);
+              
+              if (data.type === 'BIN_UPDATE') {
+                console.log('🔄 Bin update received, refreshing data...');
+                this.loadBinData();
+              } else if (data.type === 'ALERT') {
+                this.handleRealTimeAlert(data.alert);
+              }
+            } catch (error) {
+              console.error('Error parsing WebSocket message:', error);
+            }
+          };
+          
+          this.wsConnection.onclose = (event) => {
+            console.log('📡 WebSocket disconnected:', event.code, event.reason);
+            setTimeout(() => {
+              console.log('🔄 Attempting WebSocket reconnection...');
+              this.initializeWebSocket();
+            }, 5000);
+          };
+          
+          this.wsConnection.onerror = (error) => {
+            console.error('WebSocket error:', error);
+          };
+          
+        } catch (error) {
+          console.error('WebSocket initialization failed:', error);
+        }
+      }
+
+      handleRealTimeAlert(alert) {
+        // Add real-time alert to the beginning of alerts array
+        this.alerts.unshift({
+          ...alert,
+          timestamp: new Date(alert.timestamp)
+        });
+        
+        // Keep only the latest 20 alerts
+        this.alerts = this.alerts.slice(0, 20);
+        
+        // Render updated alerts
+        this.renderAlertsHistory();
+        
+        // Show notification
+        this.showNotification(`🚨 ${alert.title}: ${alert.message}`, 'warning');
+      }
+      
+      showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => notification.classList.add('show'), 100);
+        
+        setTimeout(() => {
+          notification.classList.remove('show');
+          setTimeout(() => notification.remove(), 300);
+        }, 5000);
+      }
+      
+      cleanup() {
+        console.log('🧹 Cleaning up dashboard resources...');
+        
+        if (this.refreshInterval) {
+          clearInterval(this.refreshInterval);
+        }
+        
+        if (this.wsConnection) {
+          this.wsConnection.close();
+        }
+        
+        if (this.chart) {
+          this.chart.destroy();
+        }
+      }
+    }
+    
+    // Global functions for button handlers
+    let dashboard;
+    
+    // Initialize dashboard when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🎯 DOM loaded, initializing dashboard...');
+      dashboard = new SmartWasteDashboard();
+    });
+    
+    // Global function for refresh button
+    async function refreshData() {
+      const refreshBtn = document.getElementById('refreshBtn');
+      refreshBtn.classList.add('spinning');
+      
+      try {
+        console.log('🔄 Manual refresh requested...');
+        await dashboard.loadBinData();
+        await dashboard.loadAlertsHistory();
+        dashboard.showNotification('✅ Data refreshed from MongoDB!', 'success');
+      } catch (error) {
+        console.error('Manual refresh failed:', error);
+        dashboard.showNotification('❌ Refresh failed. Check connection.', 'error');
+      } finally {
+        setTimeout(() => {
+          refreshBtn.classList.remove('spinning');
+        }, 1000);
+      }
+    }
+    
+    // Global function for logout
+    function logout() {
+      if (confirm('Are you sure you want to logout? This will disconnect from MongoDB.')) {
+        dashboard.showNotification('👋 Logging out...', 'info');
+        
+        // Cleanup resources
+        dashboard.cleanup();
+        
+        // Show loading overlay
+        dashboard.showLoadingOverlay(true);
+        
+        setTimeout(() => {
+          // Clear user session
+          dashboard.userSession = {
+            username: 'Guest',
+            role: 'Visitor',
+            lastLogin: null,
+            token: null
+          };
+          
+          // Clear data
+          dashboard.binData = [];
+          dashboard.alerts = [];
+          
+          // Update UI
+          dashboard.updateUserInterface();
+          dashboard.renderDashboard();
+          dashboard.renderAlertsHistory();
+          dashboard.updateConnectionStatus('disconnected');
+          
+          dashboard.showLoadingOverlay(false);
+          dashboard.showNotification('✅ Logged out successfully!', 'success');
+          
+          console.log('👋 User logged out, session cleared');
+        }, 2000);
+      }
+    }
+
+    // Handle page visibility change to optimize performance
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        console.log('📱 Page hidden, pausing updates');
+        if (dashboard.refreshInterval) {
+          clearInterval(dashboard.refreshInterval);
+        }
+      } else {
+        console.log('📱 Page visible, resuming updates');
+        dashboard.startRealTimeUpdates();
+        // Refresh data when page becomes visible
+        dashboard.loadBinData().catch(console.error);
+      }
+    });
+
+    // Handle connection status changes
+    window.addEventListener('online', () => {
+      console.log('🌐 Network connection restored');
+      dashboard.showNotification('🌐 Connection restored, syncing with MongoDB...', 'success');
+      dashboard.loadBinData().catch(console.error);
+    });
+
+    window.addEventListener('offline', () => {
+      console.log('📵 Network connection lost');
+      dashboard.updateConnectionStatus('disconnected');
+      dashboard.showNotification('📵 Connection lost. Working in offline mode.', 'warning');
+    });
+
+    // Debug helper for development
+    window.dashboardDebug = {
+      getBinData: () => dashboard.binData,
+      getAlerts: () => dashboard.alerts,
+      getConfig: () => CONFIG,
+      testConnection: () => dashboard.testConnection(),
+      forceRefresh: () => dashboard.loadBinData(),
+      simulateAlert: (type = 'FULL_BIN') => {
+        const alert = {
+          id: Date.now(),
+          type: type,
+          title: 'Debug Alert',
+          message: 'This is a test alert for development purposes',
+          timestamp: new Date(),
+          severity: 'medium',
+          binId: dashboard.binData[0]?.binId || 'test-bin'
+        };
+        dashboard.handleRealTimeAlert(alert);
+      }
+    };
+
+    console.log('🔧 Debug tools available at window.dashboardDebug');
+  </script>
+</body>
+</html>

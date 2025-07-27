@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register - Smart Waste Management System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px 0;
+    }
+    
+    .register-container {
+      background: #fff;
+      padding: 36px;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+      width: 420px;
+      animation: slideIn 0.5s ease-out;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .logo {
+      text-align: center;
+      font-size: 3em;
+      margin-bottom: 16px;
+      animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-10px); }
+      60% { transform: translateY(-5px); }
+    }
+    
+    h2 {
+      margin-bottom: 24px;
+      text-align: center;
+      color: #27ae60;
+      font-weight: 700;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+      position: relative;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      color: #333;
+      font-weight: 500;
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 14px;
+      border-radius: 8px;
+      border: 2px solid #e0e0e0;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+    }
+    
+    input:focus, select:focus {
+      outline: none;
+      border-color: #27ae60;
+      box-shadow: 0 0 10px rgba(39, 174, 96, 0.2);
+    }
+    
+    input:invalid:not(:placeholder-shown) {
+      border-color: #e74c3c;
+    }
+    
+    input:valid:not(:placeholder-shown) {
+      border-color: #27ae60;
+    }
+    
+    .validation-message {
+      font-size: 12px;
+      margin-top: 4px;
+      min-height: 16px;
+    }
+    
+    .validation-message.error {
+      color: #e74c3c;
+    }
+    
+    .validation-message.success {
+      color: #27ae60;
+    }
+    
+    .register-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .register-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(39, 174, 96, 0.3);
+    }
+    
+    .register-btn:disabled {
+      background: #bdc3c7;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    .loading {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid transparent;
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 10px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .error {
+      color: #e74c3c;
+      text-align: center;
+      margin-bottom: 16px;
+      padding: 12px;
+      background: rgba(231, 76, 60, 0.1);
+      border-radius: 6px;
+      border-left: 4px solid #e74c3c;
+      display: none;
+    }
+    
+    .success {
+      color: #27ae60;
+      text-align: center;
+      margin-bottom: 16px;
+      padding: 12px;
+      background: rgba(39, 174, 96, 0.1);
+      border-radius: 6px;
+      border-left: 4px solid #27ae60;
+      display: none;
+    }
+    
+    .login-link {
+      text-align: center;
+      margin-top: 20px;
+      color: #666;
+    }
+    
+    .login-link a {
+      color: #27ae60;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+    
+    .password-strength {
+      margin-top: 4px;
+      height: 4px;
+      background: #e0e0e0;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    
+    .password-strength-fill {
+      height: 100%;
+      width: 0%;
+      transition: all 0.3s ease;
+      border-radius: 2px;
+    }
+    
+    .strength-weak { background: #e74c3c; width: 25%; }
+    .strength-fair { background: #f39c12; width: 50%; }
+    .strength-good { background: #f1c40f; width: 75%; }
+    .strength-strong { background: #27ae60; width: 100%; }
+  </style>
+</head>
+<body>
+  <div class="register-container">
+    <div class="logo">👤</div>
+    <h2>Create Account</h2>
+    
+    <div id="errorMsg" class="error"></div>
+    <div id="successMsg" class="success"></div>
+    
+    <form id="registerForm">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input 
+          type="text" 
+          id="username" 
+          placeholder="Choose a username (3-20 characters)" 
+          required 
+          minlength="3"
+          maxlength="20"
+          autocomplete="username"
+        />
+        <div class="validation-message" id="usernameValidation"></div>
+      </div>
+      
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input 
+          type="email" 
+          id="email" 
+          placeholder="Enter your email address" 
+          required 
+          autocomplete="email"
+        />
+        <div class="validation-message" id="emailValidation"></div>
+      </div>
+      
+      <div class="form-group">
+        <label for="phoneNumber">Phone Number</label>
+        <input 
+          type="tel" 
+          id="phoneNumber" 
+          placeholder="Enter 10-digit phone number" 
+          pattern="[0-9]{10}" 
+          required 
+          maxlength="10"
+          autocomplete="tel"
+        />
+        <div class="validation-message" id="phoneValidation"></div>
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          placeholder="Create a strong password (min 6 characters)" 
+          required 
+          minlength="6"
+          autocomplete="new-password"
+        />
+        <div class="password-strength">
+          <div class="password-strength-fill" id="passwordStrengthFill"></div>
+        </div>
+        <div class="validation-message" id="passwordValidation"></div>
+      </div>
+      
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input 
+          type="password" 
+          id="confirmPassword" 
+          placeholder="Confirm your password" 
+          required 
+          autocomplete="new-password"
+        />
+        <div class="validation-message" id="confirmPasswordValidation"></div>
+      </div>
+      
+      <div class="form-group">
+        <label for="role">Role</label>
+        <select id="role" required>
+          <option value="" disabled selected>Select your role</option>
+          <option value="administrator">Administrator</option>
+          <option value="manager">Manager</option>
+          <option value="worker">Worker</option>
+          <option value="technician">Technician</option>
+        </select>
+        <div class="validation-message" id="roleValidation"></div>
+      </div>
+      
+      <button type="submit" class="register-btn" id="registerBtn">
+        <span class="loading" id="loadingSpinner"></span>
+        <span id="btnText">Create Account</span>
+      </button>
+    </form>
+    
+    <div class="login-link">
+      Already have an account? <a href="login.html">Login here</a>
+    </div>
+  </div>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('registerForm');
+    const inputs = {
+      username: document.getElementById('username'),
+      email: document.getElementById('email'),
+      phoneNumber: document.getElementById('phoneNumber'),
+      password: document.getElementById('password'),
+      confirmPassword: document.getElementById('confirmPassword'),
+      role: document.getElementById('role')
+    };
+    
+    const validations = {
+      username: document.getElementById('usernameValidation'),
+      email: document.getElementById('emailValidation'),
+      phoneNumber: document.getElementById('phoneValidation'),
+      password: document.getElementById('passwordValidation'),
+      confirmPassword: document.getElementById('confirmPasswordValidation'),
+      role: document.getElementById('roleValidation')
+    };
+    
+    const registerBtn = document.getElementById('registerBtn');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const btnText = document.getElementById('btnText');
+    const errorMsg = document.getElementById('errorMsg');
+    const successMsg = document.getElementById('successMsg');
+    const passwordStrengthFill = document.getElementById('passwordStrengthFill');
+
+    // Validation listeners here...
+
+    // 👇 UPDATED FORM SUBMISSION
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const isValid = validateAllFields();
+      if (!isValid) {
+        showError('Please fix all validation errors before submitting.');
+        return;
+      }
+
+      const formData = {
+        username: inputs.username.value.trim(),
+        email: inputs.email.value.trim(),
+        phoneNumber: inputs.phoneNumber.value.trim(),
+        password: inputs.password.value,
+        role: inputs.role.value
+      };
+
+      setLoadingState(true);
+
+      try {
+        const response = await fetch('https://6aa4f3e9c19f.ngrok-free.app/api/register'
+, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showSuccess(data.message || 'Account created successfully! Redirecting to login...');
+          form.reset();
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 2000);
+        } else {
+          showError(data.message || 'Registration failed. Please try again.');
+        }
+
+      } catch (error) {
+        console.error('Registration error:', error);
+        showError('Failed to connect to the server. Please try again later.');
+      } finally {
+        setLoadingState(false);
+      }
+    });
+      
+      function validateUsername() {
+        const value = inputs.username.value.trim();
+        
+        if (!value) {
+          setValidation('username', '', '');
+          return false;
+        }
+        
+        if (value.length < 3) {
+          setValidation('username', 'Username must be at least 3 characters long', 'error');
+          return false;
+        }
+        
+        if (value.length > 20) {
+          setValidation('username', 'Username must not exceed 20 characters', 'error');
+          return false;
+        }
+        
+        if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+          setValidation('username', 'Username can only contain letters, numbers, and underscores', 'error');
+          return false;
+        }
+        
+        setValidation('username', '✓ Valid username', 'success');
+        return true;
+      }
+      
+      function validateEmail() {
+        const value = inputs.email.value.trim();
+        
+        if (!value) {
+          setValidation('email', '', '');
+          return false;
+        }
+        
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+          setValidation('email', 'Please enter a valid email address', 'error');
+          return false;
+        }
+        
+        setValidation('email', '✓ Valid email address', 'success');
+        return true;
+      }
+      
+      function validatePhone() {
+        const value = inputs.phoneNumber.value.trim();
+        
+        if (!value) {
+          setValidation('phoneNumber', '', '');
+          return false;
+        }
+        
+        // Remove any non-digit characters for validation
+        const cleanPhone = value.replace(/\D/g, '');
+        
+        if (cleanPhone.length !== 10) {
+          setValidation('phoneNumber', 'Phone number must be exactly 10 digits', 'error');
+          return false;
+        }
+        
+        // Update the input with clean phone number
+        inputs.phoneNumber.value = cleanPhone;
+        setValidation('phoneNumber', '✓ Valid phone number', 'success');
+        return true;
+      }
+      
+      function validatePassword() {
+        const value = inputs.password.value;
+        
+        if (!value) {
+          setValidation('password', '', '');
+          passwordStrengthFill.className = 'password-strength-fill';
+          return false;
+        }
+        
+        let strength = 0;
+        let messages = [];
+        
+        if (value.length >= 6) strength++;
+        else messages.push('at least 6 characters');
+        
+        if (/[A-Z]/.test(value)) strength++;
+        else messages.push('uppercase letter');
+        
+        if (/[a-z]/.test(value)) strength++;
+        else messages.push('lowercase letter');
+        
+        if (/[0-9]/.test(value)) strength++;
+        else messages.push('number');
+        
+        if (/[^A-Za-z0-9]/.test(value)) strength++;
+        else messages.push('special character');
+        
+        // Update strength indicator
+        const strengthClasses = ['', 'strength-weak', 'strength-fair', 'strength-good', 'strength-strong'];
+        passwordStrengthFill.className = 'password-strength-fill ' + (strengthClasses[Math.min(strength, 4)] || '');
+        
+        if (strength < 2) {
+          setValidation('password', 'Password needs: ' + messages.slice(0, 2).join(', '), 'error');
+          return false;
+        }
+        
+        const strengthText = ['', 'Weak', 'Fair', 'Good', 'Strong'][Math.min(strength, 4)];
+        setValidation('password', `${strengthText} password`, strength >= 3 ? 'success' : 'error');
+        
+        // Revalidate confirm password if it has a value
+        if (inputs.confirmPassword.value) {
+          validateConfirmPassword();
+        }
+        
+        return strength >= 2;
+      }
+      
+      function validateConfirmPassword() {
+        const password = inputs.password.value;
+        const confirmPassword = inputs.confirmPassword.value;
+        
+        if (!confirmPassword) {
+          setValidation('confirmPassword', '', '');
+          return false;
+        }
+        
+        if (password !== confirmPassword) {
+          setValidation('confirmPassword', 'Passwords do not match', 'error');
+          return false;
+        }
+        
+        setValidation('confirmPassword', '✓ Passwords match', 'success');
+        return true;
+      }
+      
+      function validateRole() {
+        const value = inputs.role.value;
+        
+        if (!value) {
+          setValidation('role', 'Please select a role', 'error');
+          return false;
+        }
+        
+        setValidation('role', '✓ Role selected', 'success');
+        return true;
+      }
+      
+      function validateAllFields() {
+        const results = [
+          validateUsername(),
+          validateEmail(),
+          validatePhone(),
+          validatePassword(),
+          validateConfirmPassword(),
+          validateRole()
+        ];
+        
+        return results.every(result => result === true);
+      }
+      
+      function setValidation(field, message, type) {
+        const element = validations[field];
+        element.textContent = message;
+        element.className = `validation-message ${type}`;
+      }
+      
+      function setLoadingState(loading) {
+        registerBtn.disabled = loading;
+        loadingSpinner.style.display = loading ? 'inline-block' : 'none';
+        btnText.textContent = loading ? 'Creating Account...' : 'Create Account';
+      }
+      
+      function showError(message) {
+        hideMessages();
+        errorMsg.textContent = message;
+        errorMsg.style.display = 'block';
+        
+        // Auto-hide after 5 seconds
+        setTimeout(hideMessages, 5000);
+      }
+      
+      function showSuccess(message) {
+        hideMessages();
+        successMsg.textContent = message;
+        successMsg.style.display = 'block';
+      }
+      
+      function hideMessages() {
+        errorMsg.style.display = 'none';
+        successMsg.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
