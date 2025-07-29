@@ -3,21 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Smart Waste Bin Dashboard - MongoDB Integrated</title>
+  <title>Smart Waste Bin Dashboard - Real-time Integrated</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
   <style>
     :root {
-      --primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --primary: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
       --secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
       --success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
       --warning: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
       --danger: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-      --dark: #1a1a2e;
-      --darker: #16213e;
+      --dark: #1a2e1a;
+      --darker: #163e16;
       --light: #eee;
       --glass: rgba(255, 255, 255, 0.1);
-      --shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+      --shadow: 0 8px 32px rgba(31, 135, 31, 0.37);
       --border: rgba(255, 255, 255, 0.18);
     }
 
@@ -43,7 +43,7 @@
       width: 100%;
       height: 100%;
       z-index: -1;
-      background: linear-gradient(45deg, #1a1a2e, #16213e, #0f3460);
+      background: linear-gradient(45deg, #1a2e1a, #163e16, #0f3f0f);
       background-size: 400% 400%;
       animation: gradientShift 15s ease infinite;
     }
@@ -55,9 +55,9 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-                  radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
-                  radial-gradient(circle at 40% 40%, rgba(120, 198, 255, 0.3) 0%, transparent 50%);
+      background: radial-gradient(circle at 20% 80%, rgba(119, 198, 119, 0.3) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(255, 198, 119, 0.3) 0%, transparent 50%),
+                  radial-gradient(circle at 40% 40%, rgba(120, 255, 198, 0.3) 0%, transparent 50%);
       animation: float 20s ease-in-out infinite;
     }
 
@@ -331,7 +331,7 @@
 
     .refresh-btn:hover {
       transform: scale(1.1);
-      box-shadow: 0 0 30px rgba(102, 126, 234, 0.6);
+      box-shadow: 0 0 30px rgba(39, 174, 96, 0.6);
     }
 
     .refresh-btn.spinning {
@@ -365,7 +365,7 @@
 
     .card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 15px 35px rgba(31, 38, 135, 0.5);
+      box-shadow: 0 15px 35px rgba(31, 135, 31, 0.5);
     }
 
     .card:nth-child(1) { animation-delay: 0.1s; }
@@ -398,7 +398,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(26, 26, 46, 0.8);
+      background: rgba(26, 46, 26, 0.8);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -426,7 +426,7 @@
       width: 50px;
       height: 50px;
       border: 4px solid rgba(255,255,255,0.3);
-      border-top: 4px solid #667eea;
+      border-top: 4px solid #27ae60;
       border-radius: 50%;
       animation: spin 1s linear infinite;
       margin: 0 auto 1rem;
@@ -474,8 +474,8 @@
 
     .form-input:focus {
       outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+      border-color: #27ae60;
+      box-shadow: 0 0 15px rgba(39, 174, 96, 0.3);
     }
 
     .form-input::placeholder {
@@ -645,8 +645,8 @@
     }
 
     .ai-card {
-      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-      border: 1px solid rgba(102, 126, 234, 0.3);
+      background: linear-gradient(135deg, rgba(39, 174, 96, 0.1) 0%, rgba(46, 204, 113, 0.1) 100%);
+      border: 1px solid rgba(39, 174, 96, 0.3);
     }
 
     .ai-insights {
@@ -659,13 +659,13 @@
       background: var(--glass);
       border-radius: 10px;
       padding: 1rem;
-      border-left: 4px solid #667eea;
+      border-left: 4px solid #27ae60;
     }
 
     .insight-title {
       font-weight: 600;
       margin-bottom: 0.5rem;
-      color: #667eea;
+      color: #27ae60;
     }
 
     .insight-text {
@@ -766,7 +766,7 @@
   <div class="loading-overlay" id="loadingOverlay">
     <div class="loading-content">
       <div class="loading-spinner"></div>
-      <p>Connecting to MongoDB...</p>
+      <p>Connecting to server...</p>
     </div>
   </div>
   
@@ -775,7 +775,7 @@
     <div class="sidebar glass">
       <div class="logo">
         <h2>🗑️ SmartWaste</h2>
-        <p>MongoDB Integrated</p>
+        <p>Real-time Dashboard</p>
       </div>
 
       <div class="user-info">
@@ -824,7 +824,7 @@
           </div>
           <div class="connection-status" id="connectionStatus">
             <div class="status-dot status-connecting"></div>
-            <span>Connecting to MongoDB...</span>
+            <span>Connecting...</span>
           </div>
         </div>
       </div>
@@ -901,33 +901,49 @@
   <script>
     // Configuration
     const CONFIG = {
-      API_BASE_URL: 'https://14d7cf0fdb1c.ngrok-free.app/api', // Update this to match your backend
-      WS_URL: 'wss://14d7cf0fdb1c.ngrok-free.app', // Update this to match your WebSocket server
-      REFRESH_INTERVAL: 30000, // 30 seconds
-      RETRY_DELAY: 5000, // 5 seconds
+      API_BASE_URL: 'https://smart-waste-bin-management-system.onrender.com/api',
+      WS_URL: 'wss://smart-waste-bin-management-system.onrender.com',
+      REFRESH_INTERVAL: 30000,
+      RETRY_DELAY: 5000,
       MAX_RETRIES: 3
     };
 
-    // Dashboard Controller Class
+    // Smart Waste Dashboard Controller (Integrated)
     class SmartWasteDashboard {
       constructor() {
         this.wsConnection = null;
         this.binData = [];
         this.chart = null;
-        this.aiAnalytics = null;
         this.refreshInterval = null;
         this.retryCount = 0;
         this.alerts = [];
+        this.isConnected = false;
         
-        // User session (this would normally come from authentication)
+        // User session management
         this.userSession = {
-          username: 'System Administrator',
-          role: 'Administrator',
-          lastLogin: new Date().toISOString(),
-          token: null // Will be set after authentication
+          username: this.getSessionData('username') || 'System Administrator',
+          role: this.getSessionData('role') || 'Administrator',
+          lastLogin: this.getSessionData('lastLogin') || new Date().toISOString(),
+          token: this.getSessionData('token') || null
         };
         
         this.init();
+      }
+
+      getSessionData(key) {
+        try {
+          return sessionStorage.getItem(key) || null;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      setSessionData(key, value) {
+        try {
+          sessionStorage.setItem(key, value);
+        } catch (e) {
+          console.warn('Session storage not available');
+        }
       }
       
       async init() {
@@ -939,19 +955,9 @@
         this.setupEventListeners();
         
         try {
-          // Test connection and load data
-          await this.testConnection();
-          await this.loadBinData();
-          await this.loadAlertsHistory();
-          
-          // Initialize AI Analytics
-          this.initializeAI();
-          
-          // Start real-time updates
+          await this.connectToBackend();
           this.startRealTimeUpdates();
-          this.initializeWebSocket();
           
-          this.updateConnectionStatus('connected');
           console.log('✅ Dashboard initialized successfully');
           
         } catch (error) {
@@ -962,12 +968,23 @@
         }
       }
 
-      showLoadingOverlay(show) {
-        const overlay = document.getElementById('loadingOverlay');
-        if (show) {
-          overlay.classList.add('show');
-        } else {
-          overlay.classList.remove('show');
+      async connectToBackend() {
+        try {
+          // Test connection
+          await this.testConnection();
+          
+          // Load real-time data
+          await this.loadBinData();
+          await this.loadAlertsHistory();
+          
+          // Initialize WebSocket for real-time updates
+          this.initializeWebSocket();
+          
+          this.updateConnectionStatus('connected');
+          this.isConnected = true;
+          
+        } catch (error) {
+          throw error;
         }
       }
 
@@ -976,7 +993,8 @@
           const response = await fetch(`${CONFIG.API_BASE_URL}/health`, {
             method: 'GET',
             headers: {
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
+              'Authorization': this.userSession.token ? `Bearer ${this.userSession.token}` : ''
             },
             timeout: 10000
           });
@@ -994,13 +1012,25 @@
         }
       }
 
+      showLoadingOverlay(show) {
+        const overlay = document.getElementById('loadingOverlay');
+        if (show) {
+          overlay.classList.add('show');
+        } else {
+          overlay.classList.remove('show');
+        }
+      }
+
       handleConnectionError(error) {
         this.updateConnectionStatus('disconnected');
-        this.showErrorMessage(`Connection failed: ${error.message}. Please check your backend server.`);
+        this.showErrorMessage(`Connection failed: ${error.message}. Retrying...`);
+        this.isConnected = false;
         
-        // Try to load demo data as fallback
-        this.loadDemoData();
-        this.renderDashboard();
+        // Retry connection
+        setTimeout(() => {
+          console.log('🔄 Retrying connection...');
+          this.connectToBackend().catch(console.error);
+        }, CONFIG.RETRY_DELAY);
       }
 
       showErrorMessage(message) {
@@ -1008,7 +1038,6 @@
         errorElement.textContent = message;
         errorElement.style.display = 'block';
         
-        // Hide after 10 seconds
         setTimeout(() => {
           errorElement.style.display = 'none';
         }, 10000);
@@ -1016,7 +1045,7 @@
       
       async loadBinData() {
         try {
-          console.log('📡 Fetching bin data from MongoDB...');
+          console.log('📡 Fetching real-time bin data...');
           
           const response = await fetch(`${CONFIG.API_BASE_URL}/bins`, {
             method: 'GET',
@@ -1028,16 +1057,14 @@
           
           if (!response.ok) {
             if (response.status === 404) {
-              console.log('ℹ️ No bins endpoint found, trying alternative endpoints...');
               return await this.tryAlternativeEndpoints();
             }
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
           }
           
           const data = await response.json();
-          console.log('✅ Raw response from server:', data);
           
-          // Handle different response formats
+          // Handle different response formats from backend
           if (data.success && data.data) {
             this.binData = Array.isArray(data.data) ? data.data : [data.data];
           } else if (Array.isArray(data)) {
@@ -1048,10 +1075,10 @@
             this.binData = [];
           }
           
-          // Transform MongoDB data to match our interface
+          // Transform data to consistent format
           this.binData = this.binData.map(bin => this.transformBinData(bin));
           
-          console.log(`✅ Loaded ${this.binData.length} bins from MongoDB:`, this.binData);
+          console.log(`✅ Loaded ${this.binData.length} bins from backend:`, this.binData);
           this.retryCount = 0;
           
         } catch (error) {
@@ -1108,18 +1135,16 @@
       }
 
       transformBinData(bin) {
-        // Transform MongoDB document to match our interface
         return {
-          binId: bin._id || bin.binId || bin.id,
+          binId: bin._id || bin.binId || bin.id || `bin-${Date.now()}`,
           location: bin.location || 'Unknown Location',
-          fillLevel: bin.fillLevel || bin.fill_level || 0,
+          fillLevel: Math.min(100, Math.max(0, bin.fillLevel || bin.fill_level || 0)),
           capacity: bin.capacity || 100,
-          batteryLevel: bin.batteryLevel || bin.battery_level || 100,
+          batteryLevel: Math.min(100, Math.max(0, bin.batteryLevel || bin.battery_level || 100)),
           temperature: bin.temperature || 22,
           sensorStatus: bin.sensorStatus || bin.sensor_status || 'active',
           lastEmptied: bin.lastEmptied ? new Date(bin.lastEmptied) : new Date(),
           timestamp: bin.timestamp ? new Date(bin.timestamp) : new Date(),
-          // Add any additional MongoDB-specific fields
           createdAt: bin.createdAt ? new Date(bin.createdAt) : new Date(),
           updatedAt: bin.updatedAt ? new Date(bin.updatedAt) : new Date()
         };
@@ -1137,51 +1162,21 @@
           
           if (response.ok) {
             const data = await response.json();
-            this.alerts = data.data || data.alerts || [];
-            console.log(`✅ Loaded ${this.alerts.length} alerts`);
+            this.alerts = (data.data || data.alerts || []).map(alert => ({
+              ...alert,
+              timestamp: new Date(alert.timestamp || alert.createdAt || Date.now())
+            }));
+            console.log(`✅ Loaded ${this.alerts.length} alerts from backend`);
           } else {
-            // Generate demo alerts if no backend alerts
-            this.generateDemoAlerts();
+            this.alerts = [];
+            console.log('ℹ️ No alerts endpoint available');
           }
         } catch (error) {
-          console.log('⚠️ Could not load alerts, generating demo alerts');
-          this.generateDemoAlerts();
+          console.log('⚠️ Could not load alerts:', error.message);
+          this.alerts = [];
         }
         
         this.renderAlertsHistory();
-      }
-
-      generateDemoAlerts() {
-        const now = new Date();
-        this.alerts = [
-          {
-            id: 1,
-            type: 'FULL_BIN',
-            title: 'Bin Full Alert',
-            message: 'Bin at Main Building - Lobby is 95% full and needs immediate collection',
-            timestamp: new Date(now.getTime() - (2 * 60 * 60 * 1000)), // 2 hours ago
-            severity: 'high',
-            binId: 1
-          },
-          {
-            id: 2,
-            type: 'DISCONNECTED',
-            title: 'Sensor Disconnected',
-            message: 'Bin at Parking Garage - Level B1 has lost connection',
-            timestamp: new Date(now.getTime() - (6 * 60 * 60 * 1000)), // 6 hours ago
-            severity: 'medium',
-            binId: 4
-          },
-          {
-            id: 3,
-            type: 'LOW_BATTERY',
-            title: 'Low Battery Warning',
-            message: 'Bin at Conference Center has battery level below 30%',
-            timestamp: new Date(now.getTime() - (12 * 60 * 60 * 1000)), // 12 hours ago
-            severity: 'low',
-            binId: 5
-          }
-        ];
       }
 
       renderAlertsHistory() {
@@ -1197,11 +1192,11 @@
           return;
         }
 
-        container.innerHTML = this.alerts.map(alert => `
+        container.innerHTML = this.alerts.slice(0, 10).map(alert => `
           <div class="alert-item">
             <div class="alert-content">
-              <div class="alert-title">${alert.title}</div>
-              <div class="alert-message">${alert.message}</div>
+              <div class="alert-title">${alert.title || 'System Alert'}</div>
+              <div class="alert-message">${alert.message || alert.description || 'No details available'}</div>
             </div>
             <div class="alert-time">${this.formatRelativeTime(alert.timestamp)}</div>
           </div>
@@ -1221,35 +1216,6 @@
         } else {
           return 'Just now';
         }
-      }
-      
-      loadDemoData() {
-        console.log('📝 Loading demo data as fallback...');
-        const now = new Date();
-        this.binData = [
-          {
-            binId: 'demo-1',
-            location: 'Main Building - Lobby',
-            fillLevel: 45,
-            capacity: 100,
-            batteryLevel: 89,
-            temperature: 22,
-            sensorStatus: 'active',
-            lastEmptied: new Date(now.getTime() - (2 * 24 * 60 * 60 * 1000)),
-            timestamp: now
-          },
-          {
-            binId: 'demo-2',
-            location: 'Cafeteria - East Wing',
-            fillLevel: 78,
-            capacity: 120,
-            batteryLevel: 95,
-            temperature: 24,
-            sensorStatus: 'active',
-            lastEmptied: new Date(now.getTime() - (1 * 24 * 60 * 60 * 1000)),
-            timestamp: now
-          }
-        ];
       }
       
       async addNewBin() {
@@ -1276,7 +1242,7 @@
             sensorStatus: 'active'
           };
           
-          console.log('📡 Sending new bin data to MongoDB:', newBinData);
+          console.log('📡 Sending new bin data to backend:', newBinData);
           
           const response = await fetch(`${CONFIG.API_BASE_URL}/bins`, {
             method: 'POST',
@@ -1288,7 +1254,6 @@
           });
           
           if (!response.ok) {
-            // Try alternative endpoints
             const altResponse = await fetch(`${CONFIG.API_BASE_URL}/bin`, {
               method: 'POST',
               headers: {
@@ -1309,7 +1274,7 @@
             console.log('✅ Bin added successfully:', result);
           }
           
-          this.showNotification('✅ Bin added successfully to MongoDB!', 'success');
+          this.showNotification('✅ Bin added successfully!', 'success');
           document.getElementById('addBinForm').reset();
           
           // Reload data to show the new bin
@@ -1319,37 +1284,10 @@
           console.error('❌ Error adding bin:', error);
           this.showNotification(`Failed to add bin: ${error.message}`, 'error');
           
-          // Add to local data as fallback for demo purposes
-          const newBin = {
-            binId: `demo-${Date.now()}`,
-            location: location,
-            capacity: capacity,
-            fillLevel: 0,
-            batteryLevel: 100,
-            temperature: 22,
-            sensorStatus: 'active',
-            lastEmptied: new Date(),
-            timestamp: new Date()
-          };
-          
-          this.binData.push(newBin);
-          this.renderDashboard();
-          this.showNotification('✅ Bin added locally (Demo Mode)', 'warning');
-          document.getElementById('addBinForm').reset();
-          
         } finally {
           submitButton.textContent = originalText;
           submitButton.disabled = false;
         }
-      }
-      
-      initializeAI() {
-        this.aiAnalytics = {
-          initialized: true,
-          getInsights: (bins) => this.generateAIInsights(bins),
-          generatePredictions: (bins) => this.generatePredictions(bins)
-        };
-        console.log('🤖 AI Analytics initialized');
       }
       
       updateDateTime() {
@@ -1402,12 +1340,15 @@
         // Handle online/offline events
         window.addEventListener('online', () => {
           console.log('🌐 Connection restored');
-          this.loadBinData();
+          if (!this.isConnected) {
+            this.connectToBackend().catch(console.error);
+          }
         });
         
         window.addEventListener('offline', () => {
           console.log('📵 Connection lost');
           this.updateConnectionStatus('disconnected');
+          this.isConnected = false;
         });
       }
       
@@ -1440,9 +1381,9 @@
             <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
               <h3>📭 No Bins Found</h3>
               <p style="opacity: 0.7; margin-top: 1rem;">
-                ${this.updateConnectionStatus === 'connected' ? 
-                  'No bins are currently registered in your MongoDB database. Add your first bin above!' : 
-                  'Could not connect to MongoDB. Please check your backend server.'}
+                ${this.isConnected ? 
+                  'No bins are currently registered in your system. Add your first bin above!' : 
+                  'Could not connect to backend server. Please check your connection.'}
               </p>
             </div>
           `;
@@ -1465,7 +1406,7 @@
         
         card.innerHTML = `
           <div class="bin-header">
-            <div class="bin-id">Bin ${bin.binId}</div>
+            <div class="bin-id">Bin ${String(bin.binId).substring(0, 8)}</div>
             <div class="sensor-status ${statusClass}">${this.getSensorStatusText(bin.sensorStatus)}</div>
           </div>
           
@@ -1539,11 +1480,7 @@
           }
         } catch (error) {
           console.error('Error deleting bin:', error);
-          
-          // Remove from local data as fallback
-          this.binData = this.binData.filter(bin => bin.binId !== binId);
-          this.renderDashboard();
-          this.showNotification(`✅ Bin ${binId} removed locally!`, 'warning');
+          this.showNotification(`❌ Failed to delete bin: ${error.message}`, 'error');
         }
       }
       
@@ -1590,7 +1527,7 @@
           return;
         }
         
-        const labels = this.binData.map(bin => `Bin ${bin.binId.toString().substring(0, 8)}`);
+        const labels = this.binData.map(bin => `Bin ${String(bin.binId).substring(0, 8)}`);
         const data = this.binData.map(bin => bin.fillLevel);
         const colors = this.binData.map(bin => this.getFillLevelColor(bin.fillLevel));
         
@@ -1656,11 +1593,7 @@
       }
       
       generateAndDisplayAIInsights() {
-        if (!this.aiAnalytics || !this.aiAnalytics.initialized) {
-          return;
-        }
-        
-        const insights = this.aiAnalytics.getInsights(this.binData);
+        const insights = this.generateAIInsights(this.binData);
         const container = document.getElementById('aiInsights');
         
         container.innerHTML = insights.map(insight => `
@@ -1675,7 +1608,7 @@
         if (!bins || bins.length === 0) {
           return [{
             title: 'No Data Available',
-            message: 'Connect to MongoDB and add some bins to see AI insights and predictions.'
+            message: 'Connect to backend and add some bins to see AI insights and predictions.'
           }];
         }
         
@@ -1686,98 +1619,164 @@
         if (urgentBins.length > 0) {
           insights.push({
             title: '🚨 Urgent Collections Needed',
-            message: `${urgentBins.length} bin(s) need immediate attention. Critical bins: ${urgentBins.map(b => b.binId.toString().substring(0, 8)).join(', ')}`
+            message: `${urgentBins.length} bin(s) need immediate attention. Critical bins: ${urgentBins.map(b => String(b.binId).substring(0, 8)).join(', ')}`
           });
         }
         
         // System utilization analysis
-        const avgFill = bins.reduce((sum, bin) => sum + bin.fillLevel, 0) / bins.length;
-        if (avgFill > 70) {
-          insights.push({
-            title: '📈 High System Utilization',
-            message: `Average fill level is ${avgFill.toFixed(1)}%. Consider optimizing collection schedules or adding more bins.`
-          });
-        } else if (avgFill < 30) {
-          insights.push({
-            title: '📉 Low System Utilization',
-            message: `Average fill level is ${avgFill.toFixed(1)}%. System capacity is underutilized - excellent efficiency!`
-          });
-        }
-        
-        // Battery maintenance analysis
-        const lowBatteryBins = bins.filter(bin => bin.batteryLevel < 30);
-        if (lowBatteryBins.length > 0) {
-          insights.push({
-            title: '🔋 Battery Maintenance Required',
-            message: `${lowBatteryBins.length} bin(s) have low battery levels: ${lowBatteryBins.map(b => b.binId.toString().substring(0, 8)).join(', ')}`
-          });
-        }
-        
-        // Disconnected sensors
-        const disconnectedBins = bins.filter(bin => bin.sensorStatus === 'error');
-        if (disconnectedBins.length > 0) {
-          insights.push({
-            title: '📡 Sensor Connectivity Issues',
-            message: `${disconnectedBins.length} bin(s) have sensor issues and need technical attention.`
-          });
-        }
-        
-        // Performance insight
-        const optimalBins = bins.filter(bin => bin.fillLevel >= 40 && bin.fillLevel < 80 && bin.batteryLevel > 50);
-        if (optimalBins.length === bins.length) {
-          insights.push({
-            title: '✅ Optimal Performance',
-            message: 'All bins are operating within optimal parameters. MongoDB integration is working perfectly!'
-          });
-        }
-        
-        // Add connection status insight
-        insights.push({
-          title: '🔌 Database Connection',
-          message: `Successfully connected to MongoDB. Real-time data sync active for ${bins.length} bins.`
-        });
-        
-        return insights.length > 0 ? insights : [{
-          title: '🤖 AI Analysis Complete',
-          message: 'System is running smoothly with MongoDB integration. No immediate actions required.'
-        }];
+     const avgFill = bins.reduce((sum, bin) => sum + bin.fillLevel, 0) / bins.length;
       }
       
-      scheduleMaintenance(binId) {
-        this.showNotification(`🔧 Maintenance scheduled for Bin ${binId}`, 'info');
-        console.log(`Maintenance scheduled for Bin ${binId}`);
-        
-        // Add to alerts
-        this.alerts.unshift({
-          id: Date.now(),
-          type: 'MAINTENANCE',
-          title: 'Maintenance Scheduled',
-          message: `Maintenance has been scheduled for Bin ${binId}`,
-          timestamp: new Date(),
-          severity: 'low',
-          binId: binId
-        });
-        
-        this.renderAlertsHistory();
+     scheduleMaintenance(binId) {
+  this.showNotification(`🛠️ Maintenance scheduled for Bin ${binId}`, 'info');
+  console.log(`🛠️ Maintenance scheduled for Bin ${binId}`);
+
+  this.alerts.unshift({
+    id: Date.now(),
+    type: 'MAINTENANCE',
+    title: 'Maintenance Scheduled',
+    message: `Maintenance has been scheduled for Bin ${binId}`,
+    timestamp: new Date(),
+    severity: 'low',
+    binId
+  });
+
+  this.renderAlertsHistory();
+}
+
+scheduleCollection(binId) {
+  this.showNotification(`🗑️ Collection scheduled for Bin ${binId}`, 'success');
+  console.log(`🗑️ Collection scheduled for Bin ${binId}`);
+
+  this.alerts.unshift({
+    id: Date.now(),
+    type: 'COLLECTION',
+    title: 'Collection Scheduled',
+    message: `Waste collection has been scheduled for Bin ${binId}`,
+    timestamp: new Date(),
+    severity: 'low',
+    binId
+  });
+
+  this.renderAlertsHistory();
+}
+
+updateConnectionStatus(status) {
+  const statusElement = document.getElementById('connectionStatus');
+  const dot = statusElement.querySelector('.status-dot');
+  const text = statusElement.querySelector('span');
+
+  dot.className = 'status-dot';
+
+  switch (status) {
+    case 'connected':
+      dot.classList.add('status-connected');
+      text.textContent = 'Connected';
+      break;
+    case 'disconnected':
+      dot.classList.add('status-disconnected');
+      text.textContent = 'Disconnected';
+      break;
+    case 'connecting':
+      dot.classList.add('status-connecting');
+      text.textContent = 'Connecting...';
+      break;
+  }
+}
+
+startRealTimeUpdates() {
+  this.refreshInterval = setInterval(async () => {
+    if (this.isConnected) {
+      try {
+        console.log('🔄 Auto-refreshing real-time data...');
+        await this.loadBinData();
+        await this.loadAlertsHistory();
+      } catch (error) {
+        console.error('Auto-refresh failed:', error);
+        this.handleConnectionError(error);
       }
-      
-      scheduleCollection(binId) {
-        this.showNotification(`🗑️ Collection scheduled for Bin ${binId}`, 'success');
-        console.log(`Collection scheduled for Bin ${binId}`);
-        
-        // Add to alerts
-        this.alerts.unshift({
-          id: Date.now(),
-          type: 'COLLECTION',
-          title: 'Collection Scheduled',
-          message: `Waste collection has been scheduled for Bin ${binId}`,
-          timestamp: new Date(),
-          severity: 'low',
-          binId: binId
-        });
-        
-        this.renderAlertsHistory();
+    }
+  }, CONFIG.REFRESH_INTERVAL);
+}
+
+initializeWebSocket() {
+  if (!this.isConnected) return;
+
+  try {
+    console.log('📡 Attempting WebSocket connection...');
+    this.wsConnection = new WebSocket(CONFIG.WS_URL);
+
+    this.wsConnection.onopen = () => {
+      console.log('📡 WebSocket connected');
+      if (this.userSession.token) {
+        this.wsConnection.send(JSON.stringify({
+          type: 'auth',
+          token: this.userSession.token
+        }));
       }
+    };
+
+    this.wsConnection.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        console.log('📡 Real-time update received:', data);
+
+        if (['BIN_UPDATE', 'bin_update'].includes(data.type)) {
+          this.handleRealTimeBinUpdate(data.payload || data.data);
+        } else if (['ALERT', 'alert'].includes(data.type)) {
+          this.handleRealTimeAlert(data.alert || data.payload);
+        }
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
+    };
+
+    this.wsConnection.onclose = (event) => {
+      console.log('📡 WebSocket disconnected:', event.code, event.reason);
+      if (this.isConnected) {
+        setTimeout(() => {
+          console.log('🔄 Attempting WebSocket reconnection...');
+          this.initializeWebSocket();
+        }, 5000);
+      }
+    };
+
+    this.wsConnection.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+  } catch (error) {
+    console.error('WebSocket initialization failed:', error);
+  }
+}
+
+handleRealTimeBinUpdate(binUpdate) {
+  if (!binUpdate) return;
+
+  const binIndex = this.binData.findIndex(bin =>
+    bin.binId === binUpdate.binId ||
+    bin.binId === binUpdate._id ||
+    bin.binId === binUpdate.id
+  );
+
+  const updatedBin = this.transformBinData(binUpdate);
+
+  if (binIndex !== -1) {
+    this.binData[binIndex] = updatedBin;
+    console.log(`🔄 Updated bin ${updatedBin.binId || updatedBin._id} via WebSocket`);
+  } else {
+    this.binData.push(updatedBin);
+    console.log(`➕ Added new bin ${updatedBin.binId || updatedBin._id} via WebSocket`);
+  }
+
+  this.renderDashboard();
+
+  // Notify if bin is nearly full
+  if (updatedBin.fillLevel >= 85) {
+    this.showNotification(`🚨 Bin ${updatedBin.binId} is ${updatedBin.fillLevel}% full!`, 'warning');
+  }
+}
+
       
       updateConnectionStatus(status) {
         const statusElement = document.getElementById('connectionStatus');
@@ -1789,51 +1788,62 @@
         switch (status) {
           case 'connected':
             dot.classList.add('status-connected');
-            text.textContent = 'Connected to MongoDB';
+            text.textContent = 'Connected';
             break;
           case 'disconnected':
             dot.classList.add('status-disconnected');
-            text.textContent = 'MongoDB Disconnected';
+            text.textContent = 'Disconnected';
             break;
           case 'connecting':
             dot.classList.add('status-connecting');
-            text.textContent = 'Connecting to MongoDB...';
+            text.textContent = 'Connecting...';
             break;
         }
       }
       
       startRealTimeUpdates() {
-        // Refresh data from MongoDB every 30 seconds
+        // Refresh data from backend every 30 seconds
         this.refreshInterval = setInterval(async () => {
-          try {
-            console.log('🔄 Auto-refreshing data from MongoDB...');
-            await this.loadBinData();
-          } catch (error) {
-            console.error('Auto-refresh failed:', error);
+          if (this.isConnected) {
+            try {
+              console.log('🔄 Auto-refreshing real-time data...');
+              await this.loadBinData();
+              await this.loadAlertsHistory();
+            } catch (error) {
+              console.error('Auto-refresh failed:', error);
+              this.handleConnectionError(error);
+            }
           }
         }, CONFIG.REFRESH_INTERVAL);
       }
       
       initializeWebSocket() {
+        if (!this.isConnected) return;
+        
         try {
           console.log('📡 Attempting WebSocket connection...');
           this.wsConnection = new WebSocket(CONFIG.WS_URL);
           
           this.wsConnection.onopen = () => {
-            console.log('📡 WebSocket connected to backend');
-            this.updateConnectionStatus('connected');
+            console.log('📡 WebSocket connected for real-time updates');
+            // Send authentication if token available
+            if (this.userSession.token) {
+              this.wsConnection.send(JSON.stringify({
+                type: 'auth',
+                token: this.userSession.token
+              }));
+            }
           };
           
           this.wsConnection.onmessage = (event) => {
             try {
               const data = JSON.parse(event.data);
-              console.log('📡 WebSocket message received:', data);
+              console.log('📡 Real-time update received:', data);
               
-              if (data.type === 'BIN_UPDATE') {
-                console.log('🔄 Bin update received, refreshing data...');
-                this.loadBinData();
-              } else if (data.type === 'ALERT') {
-                this.handleRealTimeAlert(data.alert);
+              if (data.type === 'BIN_UPDATE' || data.type === 'bin_update') {
+                this.handleRealTimeBinUpdate(data.payload || data.data);
+              } else if (data.type === 'ALERT' || data.type === 'alert') {
+                this.handleRealTimeAlert(data.alert || data.payload);
               }
             } catch (error) {
               console.error('Error parsing WebSocket message:', error);
@@ -1842,10 +1852,12 @@
           
           this.wsConnection.onclose = (event) => {
             console.log('📡 WebSocket disconnected:', event.code, event.reason);
-            setTimeout(() => {
-              console.log('🔄 Attempting WebSocket reconnection...');
-              this.initializeWebSocket();
-            }, 5000);
+            if (this.isConnected) {
+              setTimeout(() => {
+                console.log('🔄 Attempting WebSocket reconnection...');
+                this.initializeWebSocket();
+              }, 5000);
+            }
           };
           
           this.wsConnection.onerror = (error) => {
@@ -1857,11 +1869,41 @@
         }
       }
 
+      handleRealTimeBinUpdate(binUpdate) {
+        if (!binUpdate) return;
+        
+        // Update specific bin in our data
+        const binIndex = this.binData.findIndex(bin => 
+          bin.binId === binUpdate.binId || bin.binId === binUpdate._id || bin.binId === binUpdate.id
+        );
+        
+        if (binIndex !== -1) {
+          // Update existing bin
+          this.binData[binIndex] = this.transformBinData(binUpdate);
+          console.log(`🔄 Updated bin ${binUpdate.binId || binUpdate._id} via WebSocket`);
+        } else {
+          // Add new bin
+          this.binData.push(this.transformBinData(binUpdate));
+          console.log(`➕ Added new bin ${binUpdate.binId || binUpdate._id} via WebSocket`);
+        }
+        
+        // Re-render dashboard with updated data
+        this.renderDashboard();
+        
+        // Show notification for significant changes
+        const bin = this.transformBinData(binUpdate);
+        if (bin.fillLevel >= 85) {
+          this.showNotification(`🚨 Bin ${String(bin.binId).substring(0, 8)} is ${bin.fillLevel}% full!`, 'warning');
+        }
+      }
+
       handleRealTimeAlert(alert) {
+        if (!alert) return;
+        
         // Add real-time alert to the beginning of alerts array
         this.alerts.unshift({
           ...alert,
-          timestamp: new Date(alert.timestamp)
+          timestamp: new Date(alert.timestamp || Date.now())
         });
         
         // Keep only the latest 20 alerts
@@ -1906,12 +1948,12 @@
       }
     }
     
-    // Global functions for button handlers
+    // Global dashboard instance
     let dashboard;
     
     // Initialize dashboard when DOM is ready
     document.addEventListener('DOMContentLoaded', () => {
-      console.log('🎯 DOM loaded, initializing dashboard...');
+      console.log('🎯 DOM loaded, initializing integrated dashboard...');
       dashboard = new SmartWasteDashboard();
     });
     
@@ -1922,12 +1964,14 @@
       
       try {
         console.log('🔄 Manual refresh requested...');
+        dashboard.updateConnectionStatus('connecting');
         await dashboard.loadBinData();
         await dashboard.loadAlertsHistory();
-        dashboard.showNotification('✅ Data refreshed from MongoDB!', 'success');
+        dashboard.showNotification('✅ Data refreshed successfully!', 'success');
       } catch (error) {
         console.error('Manual refresh failed:', error);
         dashboard.showNotification('❌ Refresh failed. Check connection.', 'error');
+        dashboard.handleConnectionError(error);
       } finally {
         setTimeout(() => {
           refreshBtn.classList.remove('spinning');
@@ -1937,7 +1981,7 @@
     
     // Global function for logout
     function logout() {
-      if (confirm('Are you sure you want to logout? This will disconnect from MongoDB.')) {
+      if (confirm('Are you sure you want to logout? This will disconnect from the backend.')) {
         dashboard.showNotification('👋 Logging out...', 'info');
         
         // Cleanup resources
@@ -1955,9 +1999,17 @@
             token: null
           };
           
+          // Clear session storage
+          try {
+            sessionStorage.clear();
+          } catch (e) {
+            console.warn('Could not clear session storage');
+          }
+          
           // Clear data
           dashboard.binData = [];
           dashboard.alerts = [];
+          dashboard.isConnected = false;
           
           // Update UI
           dashboard.updateUserInterface();
@@ -1984,28 +2036,44 @@
         console.log('📱 Page visible, resuming updates');
         dashboard.startRealTimeUpdates();
         // Refresh data when page becomes visible
-        dashboard.loadBinData().catch(console.error);
+        if (dashboard.isConnected) {
+          dashboard.loadBinData().catch(console.error);
+        }
       }
     });
 
     // Handle connection status changes
     window.addEventListener('online', () => {
       console.log('🌐 Network connection restored');
-      dashboard.showNotification('🌐 Connection restored, syncing with MongoDB...', 'success');
-      dashboard.loadBinData().catch(console.error);
+      dashboard.showNotification('🌐 Connection restored, reconnecting...', 'success');
+      if (!dashboard.isConnected) {
+        dashboard.connectToBackend().catch(console.error);
+      }
     });
 
     window.addEventListener('offline', () => {
       console.log('📵 Network connection lost');
       dashboard.updateConnectionStatus('disconnected');
-      dashboard.showNotification('📵 Connection lost. Working in offline mode.', 'warning');
+      dashboard.isConnected = false;
+      dashboard.showNotification('📵 Connection lost. Waiting for network...', 'warning');
     });
+
+    // Auto-reconnection logic for failed connections
+    setInterval(() => {
+      if (!dashboard.isConnected && navigator.onLine) {
+        console.log('🔄 Attempting auto-reconnection...');
+        dashboard.connectToBackend().catch(() => {
+          // Silent fail for auto-reconnection
+        });
+      }
+    }, 60000); // Try every minute
 
     // Debug helper for development
     window.dashboardDebug = {
       getBinData: () => dashboard.binData,
       getAlerts: () => dashboard.alerts,
       getConfig: () => CONFIG,
+      getConnectionStatus: () => dashboard.isConnected,
       testConnection: () => dashboard.testConnection(),
       forceRefresh: () => dashboard.loadBinData(),
       simulateAlert: (type = 'FULL_BIN') => {
@@ -2019,10 +2087,23 @@
           binId: dashboard.binData[0]?.binId || 'test-bin'
         };
         dashboard.handleRealTimeAlert(alert);
+      },
+      simulateBinUpdate: () => {
+        if (dashboard.binData.length > 0) {
+          const randomBin = dashboard.binData[Math.floor(Math.random() * dashboard.binData.length)];
+          const updatedBin = {
+            ...randomBin,
+            fillLevel: Math.floor(Math.random() * 100),
+            batteryLevel: Math.floor(Math.random() * 100),
+            timestamp: new Date()
+          };
+          dashboard.handleRealTimeBinUpdate(updatedBin);
+        }
       }
     };
 
     console.log('🔧 Debug tools available at window.dashboardDebug');
+    console.log('🚀 Smart Waste Dashboard fully initialized with real-time backend integration');
   </script>
 </body>
 </html>

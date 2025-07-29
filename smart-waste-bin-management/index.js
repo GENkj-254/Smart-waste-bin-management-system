@@ -3,16 +3,16 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config(); // Load environment variables
 
-const binRoutes = require('./src/routes/binroutes');
-const authRoutes = require('./src/routes/authRoutes');
-const User = require('./src/models/user');
+const binRoutes = require('./backend/src/routes/binroutes');
+const authRoutes = require('./backend/src/routes/authRoutes');
+const User = require('./backend/src/models/user');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // 🌐 Middleware
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'https://6aa4f3e9c19f.ngrok-free.app',
+  origin: process.env.FRONTEND_URL || 'https://smart-waste-bin-management-system.onrender.com',
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
@@ -24,7 +24,9 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.static('public'));
+const path = require('path');
+app.use(express.static(path.join(__dirname, 'backend', 'public')));
+
 
 
 // 🚀 Routes

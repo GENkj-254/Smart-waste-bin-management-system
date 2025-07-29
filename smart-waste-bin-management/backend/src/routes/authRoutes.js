@@ -1,6 +1,8 @@
+// routes/auth.js
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 require('dotenv').config();
 
@@ -22,12 +24,15 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'User with that email or username already exists.' });
     }
 
+    const hashedPassword = await bcrypt.hash(password, 12);
+
     const newUser = new User({
       username: normalizedUsername,
       email,
       phoneNumber,
-      password,
-      role
+      password: hashedPassword,
+      role,
+      isActive: true
     });
 
     await newUser.save();
@@ -59,23 +64,26 @@ router.post('/login', async (req, res) => {
     const user = await User.findOne({ username: normalizedUsername });
 
     if (!user) {
-      console.log('[DEBUG] User not found for:', normalizedUsername);
       return res.status(401).json({ message: 'Invalid credentials - user not found' });
     }
 
     if (!user.isActive) {
-      console.log('[DEBUG] User is not active:', normalizedUsername);
       return res.status(401).json({ message: 'User account is deactivated' });
+    }
+
+    if (user.isLocked) {
+      return res.status(403).json({ message: 'Account is temporarily locked. Try later.' });
     }
 
     const isMatch = await user.comparePassword(password);
 
     if (!isMatch) {
-      console.log('[DEBUG] Password mismatch for user:', normalizedUsername);
+      await user.incLoginAttempts();
       return res.status(401).json({ message: 'Invalid credentials - password mismatch' });
     }
 
-    console.log('[DEBUG] Login successful for:', normalizedUsername);
+    await user.resetLoginAttempts();
+    await user.updateLastLogin();
 
     const token = jwt.sign(
       {
@@ -93,7 +101,8 @@ router.post('/login', async (req, res) => {
       user: {
         username: user.username,
         email: user.email,
-        role: user.role
+        role: user.role,
+        lastLogin: user.lastLogin
       }
     });
 
@@ -103,5 +112,48 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// Admin-only route to unlock a user manually
+router.post('/admin/unlock-user', async (req, res) => {
+  const { username } = req.body;
+
+  try {
+    const user = await User.findOne({ username: username.toLowerCase() });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    await user.updateOne({
+      $unset: { loginAttempts: 1, lockUntil: 1 },
+      $set: { isActive: true }
+    });
+
+    return res.status(200).json({ message: 'User unlocked successfully.' });
+  } catch (error) {
+    console.error('Unlock error:', error);
+    return res.status(500).json({ message: 'Server error unlocking user.' });
+  }
+});
+
+// Auto-create admin user if none exists (call this once during setup)
+router.post('/admin/create-default', async (req, res) => {
+  try {
+    const adminExists = await User.findOne({ role: 'administrator' });
+    if (adminExists) return res.status(200).json({ message: 'Admin already exists.' });
+
+    const hashedPassword = await bcrypt.hash('admin123', 12);
+    const admin = new User({
+      username: 'admin',
+      email: 'admin@smartbin.com',
+      phoneNumber: '0700000000',
+      password: hashedPassword,
+      role: 'administrator',
+      isActive: true
+    });
+
+    await admin.save();
+    return res.status(201).json({ message: 'Default admin created successfully.' });
+  } catch (error) {
+    console.error('Create admin error:', error);
+    return res.status(500).json({ message: 'Error creating default admin.' });
+  }
+});
 
 module.exports = router;

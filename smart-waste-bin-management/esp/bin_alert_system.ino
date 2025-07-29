@@ -2,12 +2,12 @@
 #include <HTTPClient.h>
 
 // ✅ Replace with your WiFi credentials
-const char* ssid = "YourWiFiName";
-const char* password = "YourWiFiPassword";
+const char* ssid = "Genius";
+const char* password = "1234567890";
 
 // ✅ Replace with your actual MongoDB binId (_id, not binId number!)
 const String binId = "64f123abc456def789123456";
-const String serverName = " https://6aa4f3e9c19f.ngrok-free.app/api/bin/" + binId + "/data";
+const String serverName = "https://smart-waste-bin-management-system.onrender.com/api/bin/" + binId + "/data";
 
 // Sensor and buzzer pins
 const int trigPin = 5;

@@ -1,5 +1,5 @@
 // Test connection to backend
-fetch('http://localhost:5000/api/bins')
+fetch('http://smart-waste-bin-management-system.onrender.com/api/bins')
   .then(response => {
     if (!response.ok) {
       throw new Error(`Server returned ${response.status}`);
